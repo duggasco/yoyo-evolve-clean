@@ -26,15 +26,10 @@ if [ -n "${OPENROUTER_API_KEY:-}" ] && [ "$PROVIDER" = "local" ]; then
         BASE_URL="https://openrouter.ai/api/v1"
     fi
 fi
-BIRTH_DATE="2026-02-28"
 DATE=$(date +%Y-%m-%d)
 SESSION_TIME=$(date +%H:%M)
-# Compute calendar day (works on both macOS and Linux)
-if date -j &>/dev/null; then
-    DAY=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$BIRTH_DATE" +%s)) / 86400 ))
-else
-    DAY=$(( ($(date +%s) - $(date -d "$BIRTH_DATE" +%s)) / 86400 ))
-fi
+DAY=$(cat DAY_COUNT 2>/dev/null || echo 0)
+DAY=$((DAY + 1))
 echo "$DAY" > DAY_COUNT
 
 echo "=== Day $DAY ($DATE $SESSION_TIME) ==="
