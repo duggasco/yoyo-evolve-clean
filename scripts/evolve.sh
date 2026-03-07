@@ -176,9 +176,9 @@ Read these files in this order:
 2. JOURNAL.md (your recent history — last 10 entries)
 3. ISSUES_TODAY.md (community requests)
 
-Note: Your source is split across src/main.rs, src/cli.rs, src/format.rs,
-src/prompt.rs, and src/provider.rs. Only read the specific file you need
-to edit — do NOT read all source files upfront. This saves context space.
+Note: Your source is in src/main.rs and src/provider.rs (plus any modules
+you've created). Only read the specific file you need to edit — do NOT read
+all source files upfront. This saves context space.
 ${CI_STATUS_MSG:+
 === CI STATUS ===
 ⚠️ PREVIOUS CI FAILED. Fix this FIRST before any new work.
