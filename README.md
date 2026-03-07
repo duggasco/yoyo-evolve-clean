@@ -3,17 +3,14 @@
 </p>
 
 <p align="center">
-  <a href="https://yologdev.github.io/yoyo-evolve">Website</a> ·
-  <a href="https://github.com/yologdev/yoyo-evolve">GitHub</a> ·
-  <a href="https://deepwiki.com/yologdev/yoyo-evolve">DeepWiki</a> ·
-  <a href="https://github.com/yologdev/yoyo-evolve/issues">Issues</a> ·
-  <a href="https://x.com/yuanhao">Follow on X</a>
+  <a href="https://github.com/duggasco/yoyo-evolve-clean">GitHub</a> ·
+  <a href="https://github.com/duggasco/yoyo-evolve-clean/issues">Issues</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/yologdev/yoyo-evolve/actions"><img src="https://img.shields.io/github/actions/workflow/status/yologdev/yoyo-evolve/evolve.yml?label=evolution&logo=github" alt="evolution"></a>
+  <a href="https://github.com/duggasco/yoyo-evolve-clean/actions"><img src="https://img.shields.io/github/actions/workflow/status/duggasco/yoyo-evolve-clean/evolve.yml?label=evolution&logo=github" alt="evolution"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license MIT"></a>
-  <a href="https://github.com/yologdev/yoyo-evolve/commits/main"><img src="https://img.shields.io/github/last-commit/yologdev/yoyo-evolve" alt="last commit"></a>
+  <a href="https://github.com/duggasco/yoyo-evolve-clean/commits/main"><img src="https://img.shields.io/github/last-commit/duggasco/yoyo-evolve-clean" alt="last commit"></a>
 </p>
 
 ---
@@ -30,15 +27,15 @@ Watch it grow.
 
 ```
 GitHub Actions (every 8 hours)
-    → Verify build passes
-    → Fetch community issues (label: agent-input)
-    → Agent reads: IDENTITY.md, src/main.rs, JOURNAL.md, issues
-    → Self-assessment: find bugs, gaps, friction
-    → Implement improvements (as many as it can)
-    → cargo build && cargo test after each change
-    → Pass → commit. Fail → revert.
-    → Write journal entry
-    → Push
+    -> Verify build passes
+    -> Fetch community issues (label: agent-input)
+    -> Agent reads: IDENTITY.md, src/main.rs, JOURNAL.md, issues
+    -> Self-assessment: find bugs, gaps, friction
+    -> Implement improvements (as many as it can)
+    -> cargo build && cargo test after each change
+    -> Pass -> commit. Fail -> revert.
+    -> Write journal entry
+    -> Push
 ```
 
 The entire history is in the [git log](../../commits/main).
@@ -56,24 +53,36 @@ Issues with more thumbs-up reactions get prioritized. The agent responds in its 
 ## Run It Yourself
 
 ```bash
-git clone https://github.com/yologdev/yoyo-evolve
-cd yoyo-evolve
-ANTHROPIC_API_KEY=sk-... cargo run
+git clone https://github.com/duggasco/yoyo-evolve-clean
+cd yoyo-evolve-clean
+
+# Local LLM (default)
+cargo run
+
+# OpenRouter
+cargo run -- --base-url https://openrouter.ai/api/v1 --api-key sk-or-... --model google/gemini-2.5-flash
+
+# Anthropic
+ANTHROPIC_API_KEY=sk-... cargo run -- --provider anthropic
 ```
 
 Or trigger an evolution session manually:
 
 ```bash
-ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
+# OpenRouter
+OPENROUTER_API_KEY=sk-or-... MODEL=google/gemini-2.5-flash ./scripts/evolve.sh
+
+# Anthropic
+PROVIDER=anthropic ANTHROPIC_API_KEY=sk-... ./scripts/evolve.sh
 ```
 
 ## Architecture
 
 ```
-src/main.rs              The entire agent (~470 lines of Rust)
+src/main.rs              The entire agent (~400 lines of Rust)
+src/provider.rs          Local LLM / OpenRouter provider wrapper
 scripts/evolve.sh        Evolution pipeline
-scripts/build_site.py    Journey website generator
-skills/                  Skill definitions (self-assess, evolve, communicate)
+skills/                  Skill definitions (self-assess, evolve, communicate, research)
 IDENTITY.md              Agent constitution (immutable)
 JOURNAL.md               Session log (append-only)
 DAY_COUNT                Current evolution day

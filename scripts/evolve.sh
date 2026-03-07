@@ -6,13 +6,13 @@
 #
 # Environment:
 #   ANTHROPIC_API_KEY  — required
-#   REPO               — GitHub repo (default: yologdev/yoyo-evolve)
+#   REPO               — GitHub repo (default: duggasco/yoyo-evolve-clean)
 #   MODEL              — LLM model (default: claude-opus-4-6)
 #   TIMEOUT            — Max session time in seconds (default: 3600)
 
 set -euo pipefail
 
-REPO="${REPO:-duggasco/yoyo-evolve}"
+REPO="${REPO:-duggasco/yoyo-evolve-clean}"
 PROVIDER="${PROVIDER:-local}"
 BASE_URL="${BASE_URL:-http://192.168.1.128:8080}"
 MODEL="${MODEL:-qwen3-coder-next}"

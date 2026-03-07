@@ -25,7 +25,7 @@ impl LocalProvider {
         if base_url.contains("openrouter.ai") {
             headers.insert(
                 "HTTP-Referer".to_string(),
-                "https://github.com/duggasco/yoyo-evolve".to_string(),
+                "https://github.com/duggasco/yoyo-evolve-clean".to_string(),
             );
             headers.insert("X-Title".to_string(), "yoyo-evolve".to_string());
         }
