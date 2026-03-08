@@ -55,6 +55,21 @@ echo ""
 
 # ── Step 1: Verify starting state ──
 echo "→ Checking build..."
+# Guard: core source files must exist (agent might delete them while a secondary binary still compiles)
+if [ ! -f "src/main.rs" ] || [ ! -f "src/provider.rs" ]; then
+    echo "  CRITICAL: core source files missing — restoring from last known good commit"
+    for BACK in 1 2 3 4 5; do
+        git show "HEAD~${BACK}:src/main.rs" > src/main.rs 2>/dev/null && \
+        git show "HEAD~${BACK}:src/provider.rs" > src/provider.rs 2>/dev/null && break
+    done
+    if [ ! -f "src/main.rs" ] || [ ! -f "src/provider.rs" ]; then
+        echo "  FATAL: Cannot recover core source files. Exiting."
+        exit 1
+    fi
+    git add src/main.rs src/provider.rs
+    git commit -m "Day $DAY: auto-restore deleted core source files" 2>/dev/null || true
+    echo "  Restored core source files."
+fi
 if ! cargo build --quiet 2>/dev/null; then
     echo "  Build broken at start — resetting src/ to last commit"
     git checkout -- src/
