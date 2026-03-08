@@ -70,18 +70,18 @@ if [ ! -f "src/main.rs" ] || [ ! -f "src/provider.rs" ]; then
     git commit -m "Day $DAY: auto-restore deleted core source files" 2>/dev/null || true
     echo "  Restored core source files."
 fi
-if ! cargo build --quiet 2>/dev/null; then
+if ! cargo build --bin yoyo --quiet 2>/dev/null; then
     echo "  Build broken at start — resetting src/ to last commit"
     git checkout -- src/
     cargo fmt 2>/dev/null || true
-    if ! cargo build --quiet 2>/dev/null; then
+    if ! cargo build --bin yoyo --quiet 2>/dev/null; then
         echo "  Still broken after reset — walking back commits to find good build..."
         RECOVERED=0
         for BACK in 2 3 4 5; do
             echo "  Trying HEAD~${BACK}..."
             git checkout "HEAD~${BACK}" -- src/ 2>/dev/null || continue
             cargo fmt 2>/dev/null || true
-            if cargo build --quiet 2>/dev/null; then
+            if cargo build --bin yoyo --quiet 2>/dev/null; then
                 echo "  Recovered build from HEAD~${BACK}"
                 git add src/
                 git commit -m "Day $DAY: auto-recover build from HEAD~${BACK}" 2>/dev/null || true
@@ -330,9 +330,19 @@ for FIX_ROUND in $(seq 1 $FIX_ATTEMPTS); do
     fi
 
     # Collect any remaining errors
-    BUILD_OUT=$(cargo build 2>&1) || ERRORS="$ERRORS$BUILD_OUT\n"
+    BUILD_OUT=$(cargo build --bin yoyo 2>&1) || ERRORS="$ERRORS$BUILD_OUT\n"
     TEST_OUT=$(cargo test 2>&1) || ERRORS="$ERRORS$TEST_OUT\n"
     CLIPPY_OUT=$(cargo clippy --all-targets -- -D warnings 2>&1) || ERRORS="$ERRORS$CLIPPY_OUT\n"
+
+    # Guard: agent must not delete core source files
+    if [ ! -s "src/main.rs" ] || [ ! -s "src/provider.rs" ]; then
+        echo "  BLOCKED: agent deleted or emptied core source files — reverting session"
+        git checkout "$SESSION_START_SHA" -- src/
+        git checkout -- src/
+        cargo fmt 2>/dev/null || true
+        git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert session (agent deleted core files)" || true
+        break
+    fi
 
     if [ -z "$ERRORS" ]; then
         echo "  Build: PASS"
@@ -375,7 +385,7 @@ FIXEOF
         cargo fmt 2>/dev/null || true
         git add -A && git commit -m "Day $DAY ($SESSION_TIME): revert session changes (could not fix build)" || true
         # Final safety check — if build still fails, hard reset src/ to last good commit
-        if ! cargo build 2>/dev/null; then
+        if ! cargo build --bin yoyo 2>/dev/null; then
             echo "  Build still broken after revert — hard resetting src/"
             git checkout HEAD -- src/
         fi
