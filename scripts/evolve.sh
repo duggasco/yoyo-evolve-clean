@@ -59,9 +59,25 @@ if ! cargo build --quiet 2>/dev/null; then
     echo "  Build broken at start — resetting src/ to last commit"
     git checkout -- src/
     cargo fmt 2>/dev/null || true
-    if ! cargo build --quiet; then
-        echo "  FATAL: Cannot recover build. Exiting."
-        exit 1
+    if ! cargo build --quiet 2>/dev/null; then
+        echo "  Still broken after reset — walking back commits to find good build..."
+        RECOVERED=0
+        for BACK in 2 3 4 5; do
+            echo "  Trying HEAD~${BACK}..."
+            git checkout "HEAD~${BACK}" -- src/ 2>/dev/null || continue
+            cargo fmt 2>/dev/null || true
+            if cargo build --quiet 2>/dev/null; then
+                echo "  Recovered build from HEAD~${BACK}"
+                git add src/
+                git commit -m "Day $DAY: auto-recover build from HEAD~${BACK}" 2>/dev/null || true
+                RECOVERED=1
+                break
+            fi
+        done
+        if [ "$RECOVERED" -eq 0 ]; then
+            echo "  FATAL: Cannot recover build from last 5 commits. Exiting."
+            exit 1
+        fi
     fi
 fi
 cargo test --quiet
